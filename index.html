@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project 4: Real Satellite Connection</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff00, #00bfff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .status-bar {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-dot.connected {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .status-dot.disconnected {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .map-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #00bfff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tool-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tool-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .tool-btn.primary {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+        }
+        
+        .tool-btn.danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        
+        .tool-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .results-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 25px;
+        }
+        
+        #results {
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #00bfff;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #00ff00;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .ndvi-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .ndvi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .ndvi-value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .ndvi-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .excellent { background: #00ff00; color: #000; }
+        .good { background: #aaff00; color: #000; }
+        .moderate { background: #ffff00; color: #000; }
+        .poor { background: #ff0000; color: white; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .recommendation {
+            background: rgba(0, 100, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #00bfff;
+        }
+        
+        .satellite-image {
+            width: 100%;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .api-info {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛰️ Project 4: Real Satellite Connection</h1>
+            <p class="subtitle">Connect to Sentinel Hub API for actual NDVI crop health analysis</p>
+            
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <div class="status-dot disconnected" id="statusDot"></div>
+                    <span id="statusText">Backend: Disconnected</span>
+                </div>
+                <div id="serverInfo"></div>
+            </div>
+        </header>
+        
+        <div class="dashboard">
+            <div class="map-container">
+                <div class="panel-title">
+                    <span>🗺️ Satellite Map</span>
+                </div>
+                <div id="map"></div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="panel-title">
+                    <span>🛠️ Controls</span>
+                </div>
+                
+                <button class="tool-btn" onclick="enableDrawing('rectangle')" id="drawBtn">
+                    📐 Draw Field Boundary
+                </button>
+                
+                <button class="tool-btn" onclick="analyzeField()" id="analyzeBtn" disabled>
+                    🔍 Analyze with Satellite
+                </button>
+                
+                <button class="tool-btn primary" onclick="testBackend()">
+                    🔌 Test Backend Connection
+                </button>
+                
+                <button class="tool-btn" onclick="getWeather()">
+                    🌤️ Get Weather Data
+                </button>
+                
+                <button class="tool-btn danger" onclick="clearAll()">
+                    🗑️ Clear All
+                </button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                    <strong>📝 Current Field:</strong>
+                    <div id="fieldInfo" style="margin-top: 10px; color: #aaa;">
+                        No field drawn
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <div class="panel-title">
+                <span>📊 Satellite Analysis Results</span>
+            </div>
+            <div id="results">
+                <div class="loading" id="initialLoading">
+                    <div class="spinner"></div>
+                    <p>Draw a field and click "Analyze with Satellite" to get real NDVI data</p>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #aaa;">
+                        Backend: http://localhost:5000
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>🌍 <strong>Project 4:</strong> Real Satellite Data Integration | Backend: Python Flask + Sentinel Hub API</p>
+            <p>Note: Requires API credentials from https://www.sentinel-hub.com/ (Free tier available)</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const BACKEND_URL = 'http://localhost:5000';
+        let currentField = null;
+        let currentFieldLayer = null;
+        let drawnItems = null;
+        let drawControl = null;
+        let isBackendConnected = false;
+        
+        // ============================================
+        // INITIALIZE MAP
+        // ============================================
+        var map = L.map('map').setView([23.2599, 77.4126], 6);
+        
+        // Add satellite layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Satellite Imagery © Esri',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Initialize drawn items
+        drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        
+        // ============================================
+        // BACKEND CONNECTION
+        // ============================================
+        async function testBackend() {
+            showLoading('Testing backend connection...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/test-satellite`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    setBackendStatus(true, '✅ Connected to backend & satellite API');
+                    showMessage('Success! Backend and satellite API are working correctly.', 'success');
+                } else {
+                    setBackendStatus(false, '❌ Backend error');
+                    showMessage(`Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                setBackendStatus(false, '❌ Cannot connect to backend');
+                showMessage(`Cannot connect to backend at ${BACKEND_URL}. Make sure Python server is running.`, 'error');
+                console.error('Backend error:', error);
+            }
+        }
+        
+        function setBackendStatus(connected, message) {
+            isBackendConnected = connected;
+            document.getElementById('statusDot').className = `status-dot ${connected ? 'connected' : 'disconnected'}`;
+            document.getElementById('statusText').textContent = message;
+            document.getElementById('analyzeBtn').disabled = !connected || !currentField;
+        }
+        
+        // ============================================
+        // DRAWING FUNCTIONS
+        // ============================================
+        function enableDrawing(type) {
+            if (drawControl) {
+                map.removeControl(drawControl);
+            }
+            
+            var drawOptions = {
+                draw: {
+                    polygon: (type === 'polygon'),
+                    rectangle: (type === 'rectangle'),
+                    circle: false,
+                    marker: false,
+                    polyline: false,
+                    circlemarker: false
+                },
+                edit: {
+                    featureGroup: drawnItems
+                }
+            };
+            
+            drawControl = new L.Control.Draw(drawOptions);
+            map.addControl(drawControl);
+            
+            if (type === 'rectangle') {
+                new L.Draw.Rectangle(map, drawOptions.draw).enable();
+            } else if (type === 'polygon') {
+                new L.Draw.Polygon(map, drawOptions.draw).enable();
+            }
+            
+            showMessage('Click and drag to draw a field boundary on the map');
+        }
+        
+        // Handle drawn shapes
+        map.on(L.Draw.Event.CREATED, function(event) {
+            var layer = event.layer;
+            currentFieldLayer = layer;
+            drawnItems.addLayer(layer);
+            
+            // Style the field
+            layer.setStyle({
+                color: '#00bfff',
+                fillColor: '#00bfff',
+                fillOpacity: 0.1,
+                weight: 3,
+                dashArray: '5, 5'
+            });
+            
+            // Get bounds
+            var bounds = layer.getBounds();
+            var ne = bounds.getNorthEast();
+            var sw = bounds.getSouthWest();
+            
+            currentField = {
+                bounds: [
+                    [sw.lat, sw.lng],
+                    [ne.lat, sw.lng],
+                    [ne.lat, ne.lng],
+                    [sw.lat, ne.lng],
+                    [sw.lat, sw.lng]  // Close polygon
+                ],
+                name: `Field ${new Date().getTime().toString().slice(-4)}`,
+                area: calculateArea(sw.lat, sw.lng, ne.lat, ne.lng)
+            };
+            
+            // Update field info
+            document.getElementById('fieldInfo').innerHTML = `
+                <strong>${currentField.name}</strong><br>
+                Area: ~${currentField.area} acres<br>
+                Coordinates: ${sw.lat.toFixed(4)}, ${sw.lng.toFixed(4)} to ${ne.lat.toFixed(4)}, ${ne.lng.toFixed(4)}
+            `;
+            
+            // Enable analyze button
+            document.getElementById('analyzeBtn').disabled = !isBackendConnected;
+            
+            // Remove drawing controls
+            if (drawControl) {
+                map.removeControl(drawControl);
+                drawControl = null;
+            }
+            
+            showMessage('Field drawn! Click "Analyze with Satellite" to get NDVI data');
+        });
+        
+        function calculateArea(lat1, lng1, lat2, lng2) {
+            // Simple area approximation (for demo)
+            const latDiff = Math.abs(lat1 - lat2);
+            const lngDiff = Math.abs(lng1 - lng2);
+            const area = latDiff * lngDiff * 111 * 111 * 247; // Convert to acres
+            return Math.round(area);
+        }
+        
+        // ============================================
+        // SATELLITE ANALYSIS
+        // ============================================
+        async function analyzeField() {
+            if (!currentField) {
+                showMessage('Please draw a field first', 'error');
+                return;
+            }
+            
+            if (!isBackendConnected) {
+                showMessage('Please test backend connection first', 'error');
+                return;
+            }
+            
+            showLoading('Connecting to Sentinel Hub satellite API...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/analyze-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bounds: currentField.bounds,
+                        name: currentField.name
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' || data.status === 'mock') {
+                    displayResults(data);
+                    if (data.status === 'mock') {
+                        showMessage('Using mock data. Check API credentials for real satellite data.', 'warning');
+                    } else {
+                        showMessage('✅ Success! Real satellite data received', 'success');
+                    }
+                } else {
+                    showMessage(`Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to connect to backend. Make sure server is running.', 'error');
+                console.error('Analysis error:', error);
+            }
+        }
+        
+        // ============================================
+        // RESULTS DISPLAY
+        // ============================================
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Update field color based on NDVI
+            if (currentFieldLayer && data.ndvi_color) {
+                currentFieldLayer.setStyle({
+                    color: data.ndvi_color,
+                    fillColor: data.ndvi_color,
+                    fillOpacity: 0.2,
+                    weight: 3
+                });
+            }
+            
+            let imageHtml = '';
+            if (data.image_data) {
+                imageHtml = `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <h4>🛰️ Satellite NDVI Analysis</h4>
+                        <img src="data:${data.image_format};base64,${data.image_data}" 
+                             class="satellite-image" alt="NDVI Analysis">
+                        <p style="font-size: 0.9em; opacity: 0.8;">Sentinel-2 Satellite Image (NDVI visualization)</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = `
+                ${imageHtml}
+                
+                <div class="ndvi-result">
+                    <div class="ndvi-header">
+                        <div>
+                            <div style="font-size: 1.2em; color: #00bfff;">${data.field_name}</div>
+                            <div class="ndvi-value">NDVI: ${data.ndvi_value}</div>
+                        </div>
+                        <div class="ndvi-badge ${data.ndvi_class}">
+                            ${data.ndvi_status}
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value">${data.statistics.mean_ndvi}</div>
+                            <div class="stat-label">Mean NDVI</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.statistics.health_score}%</div>
+                            <div class="stat-label">Health Score</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.statistics.min_ndvi}</div>
+                            <div class="stat-label">Min NDVI</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.statistics.max_ndvi}</div>
+                            <div class="stat-label">Max NDVI</div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation">
+                        <strong>📋 Recommendations:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="api-info">
+                    <strong>🌐 API Details:</strong><br>
+                    Service: ${data.api_used}<br>
+                    Date: ${data.analysis_date}<br>
+                    Cloud Coverage: ${data.cloud_coverage}<br>
+                    Resolution: ${data.resolution}<br>
+                    Status: ${data.status === 'mock' ? '⚠️ Using mock data (check credentials)' : '✅ Real satellite data'}
+                </div>
+            `;
+        }
+        
+        // ============================================
+        // WEATHER FUNCTION
+        // ============================================
+        async function getWeather() {
+            if (!currentField) {
+                showMessage('Please draw a field first', 'error');
+                return;
+            }
+            
+            showLoading('Fetching weather data...');
+            
+            try {
+                const bounds = currentField.bounds[0];
+                const response = await fetch(`${BACKEND_URL}/weather?lat=${bounds[0]}&lng=${bounds[1]}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = `
+                        <div class="ndvi-result">
+                            <h3 style="color: #00bfff; margin-bottom: 20px;">🌤️ Weather Forecast</h3>
+                            <div style="background: rgba(0,100,255,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <strong>Current Conditions:</strong><br>
+                                Temperature: ${data.current.temperature}°C<br>
+                                Humidity: ${data.current.humidity}%<br>
+                                Precipitation: ${data.current.precipitation} mm<br>
+                                Wind: ${data.current.wind_speed} km/h<br>
+                                Condition: ${data.current.condition}
+                            </div>
+                            
+                            <strong>3-Day Forecast:</strong>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                                ${data.forecast.map(day => `
+                                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                                        <strong>${day.day}</strong><br>
+                                        <div style="font-size: 1.5em; margin: 10px 0;">${day.high}° / ${day.low}°</div>
+                                        ${day.condition}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    showMessage('Weather data loaded', 'success');
+                }
+            } catch (error) {
+                showMessage('Failed to fetch weather data', 'error');
+            }
+        }
+        
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function clearAll() {
+            drawnItems.clearLayers();
+            currentField = null;
+            currentFieldLayer = null;
+            
+            document.getElementById('fieldInfo').innerHTML = 'No field drawn';
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Draw a field and click "Analyze with Satellite" to get real NDVI data</p>
+                </div>
+            `;
+            
+            document.getElementById('analyzeBtn').disabled = true;
+            showMessage('All fields cleared');
+        }
+        
+        function showLoading(message) {
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        function showMessage(message, type = 'info') {
+            // Create temporary message
+            const msgDiv = document.createElement('div');
+            msgDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'error' ? '#ff4444' : type === 'success' ? '#00ff00' : '#00bfff'};
+                color: ${type === 'error' || type === 'success' ? 'white' : 'black'};
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            msgDiv.textContent = message;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => {
+                msgDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => document.body.removeChild(msgDiv), 300);
+            }, 3000);
+        }
+        
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        console.log('🚀 Project 4 Frontend Loaded');
+        console.log('Backend URL:', BACKEND_URL);
+        
+        // Test backend connection on load
+        setTimeout(() => {
+            testBackend();
+        }, 1000);
+        
+        // Add sample marker
+        L.marker([23.2599, 77.4126]).addTo(map)
+            .bindPopup('<strong>Madhya Pradesh Farmland</strong><br>Draw a field here to test satellite analysis!')
+            .openPopup();
+    </script>
+</body>
+</html>
