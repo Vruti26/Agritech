@@ -1,2 +1,13 @@
-SENTINEL_HUB_CLIENT_ID=759cecf8-84b1-4446-b61c-c33b83c56f14
-SENTINEL_HUB_CLIENT_SECRET=JBMyMJIVmHhGOsCckmhsqBvKZBXXBnAh
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local development
+instance/
