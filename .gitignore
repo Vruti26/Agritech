@@ -1,13 +1,15 @@
-# Environment variables and secrets
+# Environment files
 .env
 .env.*
 !.env.example
 
-# Python
+# Python virtual environment
 .venv/
+
+# Python-generated files
 __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Local development
+# Local application data
 instance/
