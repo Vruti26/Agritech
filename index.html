@@ -7,351 +7,494 @@
 
     <title>Agritch | Agricultural Intelligence</title>
 
-    <meta
-        name="description"
-        content="Agritch is an agricultural intelligence platform in development, designed to help farmers make informed decisions using satellite imagery, soil information and weather data."
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 
-    <meta name="theme-color" content="#102c20">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --background: #102c20;
-            --surface: #183b2b;
-            --primary: #b8dc91;
-            --text: #f3f5ed;
-            --muted: #b2c4b5;
-        }
-
-        body {
-            min-height: 100vh;
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(ellipse at 80% 15%, #315c3d 0%, transparent 40%),
-                radial-gradient(ellipse at 10% 90%, #234c34 0%, transparent 40%),
-                var(--background);
-            display: flex;
-            flex-direction: column;
-        }
-
-        nav {
-            width: 100%;
-            padding: 28px 8%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-family: 'Manrope', sans-serif;
-            font-size: 25px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            color: var(--primary);
-        }
-
-        .status {
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border: 1px solid #8eae78;
-            color: var(--primary);
-            border-radius: 30px;
-            padding: 9px 16px;
-        }
-
-        main {
-            flex: 1;
-            width: 100%;
-            max-width: 1150px;
-            margin: auto;
-            padding: 75px 8% 100px;
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            align-items: center;
-            gap: 65px;
-        }
-
-        .eyebrow {
-            color: var(--primary);
-            font-size: 12px;
-            letter-spacing: 3px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 25px;
-        }
-
-        h1 {
-            font-family: 'Manrope', sans-serif;
-            font-size: clamp(48px, 7vw, 82px);
-            line-height: 1.08;
-            letter-spacing: -4px;
-            margin-bottom: 25px;
-        }
-
-        h1 span {
-            color: var(--primary);
-        }
-
-        .description {
-            color: var(--muted);
-            font-size: 17px;
-            line-height: 1.9;
-            max-width: 540px;
-            margin-bottom: 35px;
-        }
-
-        .buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-
-        .button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px 23px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            transition: 0.25s ease;
-        }
-
-        .primary-button {
-            background: var(--primary);
-            color: #173322;
-        }
-
-        .primary-button:hover {
-            background: #d1edaf;
-            transform: translateY(-3px);
-        }
-
-        .secondary-button {
-            border: 1px solid #6b8c72;
-            color: var(--text);
-        }
-
-        .secondary-button:hover {
-            background: #ffffff12;
-            transform: translateY(-3px);
-        }
-
-        .visual {
-            position: relative;
-            min-height: 360px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .orbit {
-            width: 300px;
-            height: 300px;
-            border: 1px solid #9dbd7d55;
-            border-radius: 50%;
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .orbit::before {
-            content: "";
-            position: absolute;
-            width: 220px;
-            height: 220px;
-            border: 1px dashed #9dbd7d77;
-            border-radius: 50%;
-        }
-
-        .plant {
-            font-size: 115px;
-            filter: drop-shadow(0 15px 30px #0005);
-            z-index: 1;
-        }
-
-        .floating-card {
-            position: absolute;
-            background: #244a35;
-            border: 1px solid #8da77d55;
-            border-radius: 12px;
-            padding: 14px 18px;
-            box-shadow: 0 15px 35px #0003;
-        }
-
-        .floating-card small {
-            display: block;
-            color: var(--muted);
-            font-size: 10px;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .floating-card strong {
-            font-size: 13px;
-            color: var(--primary);
-        }
-
-        .card-one {
-            top: 25px;
-            right: -5px;
-        }
-
-        .card-two {
-            bottom: 35px;
-            left: -5px;
-        }
-
-        footer {
-            padding: 25px 8%;
-            border-top: 1px solid #ffffff15;
-            color: #a8b9aa;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 800px) {
-            main {
-                grid-template-columns: 1fr;
-                padding-top: 55px;
-                gap: 30px;
-            }
-
-            .visual {
-                min-height: 300px;
-            }
-
-            .orbit {
-                width: 250px;
-                height: 250px;
-            }
-
-            h1 {
-                letter-spacing: -2px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            nav {
-                padding: 22px 6%;
-            }
-
-            main {
-                padding: 55px 6%;
-            }
-
-            .description {
-                font-size: 15px;
-            }
-
-            footer {
-                padding: 22px 6%;
-            }
-        }
-    </style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <nav>
-        <div class="logo">agrItch.</div>
-        <div class="status">● Under Development</div>
+<div class="app-container">
+
+    <header class="app-header">
+        <div>
+            <h1>🌱 Agritch</h1>
+            <p>Smart Agricultural Intelligence Platform</p>
+            <a
+                class="project-repo-link"
+                href="https://github.com/Vruti26/Agritech"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Agritch is under development. Open its GitHub repository."
+            >
+                ↗ Project under development · View on GitHub
+            </a>
+        </div>
+
+        <div class="backend-status">
+            <span id="statusDot" class="status-dot disconnected"></span>
+            <span id="statusText">Backend: Connecting...</span>
+        </div>
+    </header>
+
+
+    <nav class="main-nav">
+        <button class="nav-btn active" data-section="dashboardSection">
+            Dashboard
+        </button>
+
+        <button class="nav-btn" data-section="farmsSection">
+            My Farms
+        </button>
+
+        <button class="nav-btn" data-section="soilSection">
+            Soil Testing
+        </button>
+
+        <button class="nav-btn" data-section="analysisSection">
+            Field Analysis
+        </button>
     </nav>
 
+
     <main>
-        <section>
-            <div class="eyebrow">Agricultural Intelligence · Gujarat, India</div>
 
-            <h1>
-                Growing a <span>smarter</span> future.
-            </h1>
+        <!-- DASHBOARD -->
 
-            <p class="description">
-                Agritch is an agricultural intelligence platform being
-                developed to bring satellite imagery, soil information
-                and weather insights together — helping farmers make
-                more informed agricultural decisions.
-            </p>
+        <section id="dashboardSection" class="page-section active">
 
-            <div class="buttons">
-                <a
-                    class="button primary-button"
-                    href="https://github.com/Vruti26/Agritech"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Explore on GitHub ↗
-                </a>
+            <div class="welcome-card">
+                <h2>Welcome to Agritch 🌾</h2>
 
-                <a
-                    class="button secondary-button"
-                    href="https://github.com/Vruti26/Agritech"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    View Development
-                </a>
+                <p>
+                    Monitor your agricultural fields using satellite
+                    observations, weather intelligence, and soil information.
+                </p>
             </div>
+
+            <div class="overview-grid">
+
+                <div class="overview-card">
+                    <span class="overview-icon">🚜</span>
+                    <h3>My Farms</h3>
+                    <p>Register and manage your agricultural fields.</p>
+                    <button class="action-btn" data-go="farmsSection">
+                        Manage Farms
+                    </button>
+                </div>
+
+                <div class="overview-card">
+                    <span class="overview-icon">🧪</span>
+                    <h3>Soil Profile</h3>
+                    <p>Store soil test results and understand soil properties.</p>
+                    <button class="action-btn" data-go="soilSection">
+                        Add Soil Test
+                    </button>
+                </div>
+
+                <div class="overview-card">
+                    <span class="overview-icon">🛰️</span>
+                    <h3>Satellite Analysis</h3>
+                    <p>Explore Sentinel-2 vegetation observations.</p>
+                    <button class="action-btn" data-go="analysisSection">
+                        Analyse Field
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="content-card">
+                <h2>How Agritch works</h2>
+
+                <div class="workflow">
+                    <div>1. Register your farm</div>
+                    <div>2. Add soil information</div>
+                    <div>3. Analyse satellite data</div>
+                    <div>4. Review weather intelligence</div>
+                    <div>5. Make informed farm decisions</div>
+                </div>
+            </div>
+
         </section>
 
-        <section class="visual" aria-label="Agricultural illustration">
-            <div class="orbit"></div>
 
-            <div class="plant">🌱</div>
+        <!-- MY FARMS -->
 
-            <div class="floating-card card-one">
-                <small>PROJECT STATUS</small>
-                <strong>Building in progress</strong>
+        <section id="farmsSection" class="page-section">
+
+            <div class="section-heading">
+                <h2>🚜 My Farms</h2>
+                <p>Register and manage your agricultural fields.</p>
             </div>
 
-            <div class="floating-card card-two">
-                <small>PROJECT FOCUS</small>
-                <strong>Data-driven agriculture</strong>
+            <div class="content-card">
+
+                <h3>Register a New Farm</h3>
+
+                <form id="farmForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="farmName">Farm name *</label>
+                            <input
+                                type="text"
+                                id="farmName"
+                                required
+                                maxlength="100"
+                                placeholder="e.g. My Farm">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="district">District *</label>
+                            <input
+                                type="text"
+                                id="district"
+                                required
+                                placeholder="e.g. Ahmedabad">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="village">Village</label>
+                            <input
+                                type="text"
+                                id="village"
+                                placeholder="Enter village name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="soilType">Soil type</label>
+                            <select id="soilType">
+                                <option value="">Select soil type</option>
+                                <option value="Black soil">Black soil</option>
+                                <option value="Alluvial soil">Alluvial soil</option>
+                                <option value="Sandy soil">Sandy soil</option>
+                                <option value="Loamy soil">Loamy soil</option>
+                                <option value="Clay soil">Clay soil</option>
+                                <option value="Red soil">Red soil</option>
+                                <option value="Other">Other / Unknown</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="waterSource">Water source</label>
+                            <select id="waterSource">
+                                <option value="">Select water source</option>
+                                <option value="Borewell">Borewell</option>
+                                <option value="Canal">Canal</option>
+                                <option value="River">River</option>
+                                <option value="Pond">Pond</option>
+                                <option value="Rainfed">Rainfed</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="irrigationMethod">Irrigation method</label>
+                            <select id="irrigationMethod">
+                                <option value="">Select method</option>
+                                <option value="Drip">Drip irrigation</option>
+                                <option value="Sprinkler">Sprinkler</option>
+                                <option value="Flood">Flood irrigation</option>
+                                <option value="Furrow">Furrow irrigation</option>
+                                <option value="Rainfed">Rainfed</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="map-selection">
+                        <h3>Farm Boundary *</h3>
+
+                        <p>
+                            Draw a polygon or rectangle on the map below.
+                            This boundary will be saved with your farm.
+                        </p>
+
+                        <div id="farmMap" class="map"></div>
+
+                        <div id="farmBoundaryInfo" class="info-message">
+                            No boundary selected.
+                        </div>
+                    </div>
+
+                    <button type="submit" id="registerFarmBtn" class="primary-btn">
+                        Register Farm
+                    </button>
+
+                </form>
+
             </div>
+
+
+            <div class="content-card">
+
+                <div class="section-heading inline-heading">
+                    <div>
+                        <h3>Registered Farms</h3>
+                        <p>Your saved agricultural fields.</p>
+                    </div>
+
+                    <button type="button" id="refreshFarmsBtn" class="secondary-btn">
+                        Refresh Farms
+                    </button>
+                </div>
+
+                <div id="farmsList">
+                    <p class="muted">Farm list will appear here.</p>
+                </div>
+
+            </div>
+
         </section>
+
+
+        <!-- SOIL TESTING -->
+
+        <section id="soilSection" class="page-section">
+
+            <div class="section-heading">
+                <h2>🧪 Soil Testing</h2>
+                <p>Save laboratory soil test results for your farms.</p>
+            </div>
+
+            <div class="content-card">
+
+                <h3>Add Soil Test</h3>
+
+                <form id="soilForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+                            <label for="soilFarmId">Select farm *</label>
+                            <select id="soilFarmId" required>
+                                <option value="">Load your farms first</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sampleDate">Sample date</label>
+                            <input type="date" id="sampleDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="soilPH">pH</label>
+                            <input
+                                type="number"
+                                id="soilPH"
+                                min="0"
+                                max="14"
+                                step="0.01"
+                                placeholder="e.g. 7.2">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="soilEC">Electrical conductivity (EC)</label>
+                            <input
+                                type="number"
+                                id="soilEC"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 0.45">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="organicCarbon">Organic carbon</label>
+                            <input
+                                type="number"
+                                id="organicCarbon"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 0.65">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nitrogen">Nitrogen</label>
+                            <input
+                                type="number"
+                                id="nitrogen"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 280">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phosphorus">Phosphorus</label>
+                            <input
+                                type="number"
+                                id="phosphorus"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 25">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="potassium">Potassium</label>
+                            <input
+                                type="number"
+                                id="potassium"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 240">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="soilTexture">Soil texture</label>
+                            <input
+                                type="text"
+                                id="soilTexture"
+                                placeholder="e.g. Clay loam">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="laboratoryName">Laboratory name</label>
+                            <input
+                                type="text"
+                                id="laboratoryName"
+                                placeholder="Laboratory name">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="soilNotes">Notes</label>
+                            <textarea
+                                id="soilNotes"
+                                rows="3"
+                                placeholder="Optional notes from your soil report"></textarea>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="primary-btn">
+                        Save Soil Test
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="content-card">
+
+                <h3>Soil Test History</h3>
+
+                <div id="soilHistory">
+                    <p class="muted">Select a farm to view its soil history.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FIELD ANALYSIS -->
+
+        <section id="analysisSection" class="page-section">
+
+            <div class="section-heading">
+                <h2>🛰️ Field Intelligence</h2>
+                <p>Satellite-based vegetation monitoring and weather intelligence.</p>
+            </div>
+
+            <div class="analysis-layout">
+
+                <div class="content-card">
+
+                    <h3>Select Field Boundary</h3>
+
+                    <p class="map-hint">
+                        Draw a rectangle or polygon using the map tools.
+                    </p>
+
+                    <div id="analysisMap" class="map"></div>
+
+                    <div id="analysisFieldInfo" class="info-message">
+                        No field selected.
+                    </div>
+
+                </div>
+
+
+                <div class="content-card">
+
+                    <h3>Analysis Controls</h3>
+
+                    <div class="form-group">
+                        <label for="startDate">Analysis start date</label>
+                        <input type="date" id="startDate" value="2026-10-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endDate">Analysis end date</label>
+                        <input type="date" id="endDate" value="2026-10-31">
+                    </div>
+
+                    <button
+                        type="button"
+                        class="primary-btn"
+                        id="analyzeBtn"
+                        disabled>
+                        🌱 Analyse Field
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="testBackendBtn">
+                        Test Backend Connection
+                    </button>
+
+                    <button
+                        type="button"
+                        class="danger-btn"
+                        id="clearFieldBtn">
+                        Clear Field
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="content-card">
+
+                <h3>📊 Complete Field Analysis Report</h3>
+
+                <div id="results">
+                    <p class="muted">
+                        Select a field boundary and click Analyse Field.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
+
+    <div id="notification" class="notification" role="status" aria-live="polite"></div>
+
+
     <footer>
-        <span>© 2026 Agritch · Built with a vision for smarter agriculture.</span>
-        <a
-            href="https://github.com/Vruti26/Agritech"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            GitHub Repository ↗
-        </a>
+        <p><strong>Agritch</strong> | Agricultural Intelligence Platform</p>
+        <p>Flask · Sentinel-2 · Open-Meteo · Leaflet</p>
+        <p>
+            Satellite and modelled weather data support farm decisions.
+            They do not replace field inspection, laboratory soil testing,
+            or professional agronomic advice.
+        </p>
     </footer>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script src="script.js"></script>
 
 </body>
 </html>
