@@ -10,7 +10,844 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 
-<link rel="stylesheet" href="style.css">
+<style>
+/* Agritch application styles (inlined from style.css) */
+
+/* =========================================
+   AGRITCH - GLOBAL STYLES
+========================================= */
+
+:root {
+    --primary: #237a45;
+    --primary-dark: #185c34;
+    --primary-light: #e8f5ec;
+    --accent: #d8efb0;
+    --background: #f4f7f3;
+    --surface: #ffffff;
+    --text: #26352b;
+    --muted: #718078;
+    --border: #e1e9e2;
+    --danger: #c0392b;
+    --shadow: 0 4px 18px rgba(25, 65, 38, 0.07);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.app-container {
+    max-width: 1500px;
+    margin: auto;
+    padding: 24px;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.app-header {
+    background: linear-gradient(120deg, #174b2d, #237a45, #398c52);
+    color: white;
+    border-radius: 18px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: var(--shadow);
+}
+
+.app-header h1 {
+    font-size: 32px;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+}
+
+.app-header p {
+    color: #d9efdf;
+    font-size: 14px;
+}
+
+.project-repo-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 11px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+    color: #f0f8ef;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.project-repo-link:hover {
+    background: rgba(0, 0, 0, 0.24);
+    transform: translateY(-1px);
+}
+
+.project-repo-link:focus-visible {
+    outline: 3px solid #d8efb0;
+    outline-offset: 3px;
+}
+
+.backend-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.16);
+    padding: 11px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-dot.connected {
+    background: #65ed91;
+    box-shadow: 0 0 9px #65ed91;
+}
+
+.status-dot.disconnected {
+    background: #ff7777;
+    box-shadow: 0 0 9px #ff7777;
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 22px 0;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.nav-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+
+/* =========================================
+   PAGE SECTIONS
+========================================= */
+
+.page-section {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.page-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-heading {
+    margin: 12px 0 20px;
+}
+
+.section-heading h2 {
+    color: var(--primary-dark);
+    font-size: 25px;
+    margin-bottom: 4px;
+}
+
+.section-heading p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.inline-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+.welcome-card {
+    padding: 30px;
+    border-radius: 16px;
+    background: linear-gradient(120deg, #e5f5e8, #f3f9e8);
+    border: 1px solid #d4e9d7;
+    margin-bottom: 22px;
+}
+
+.welcome-card h2 {
+    color: var(--primary-dark);
+    font-size: 26px;
+    margin-bottom: 8px;
+}
+
+.welcome-card p {
+    color: #52665a;
+    max-width: 750px;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.overview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.overview-icon {
+    font-size: 30px;
+    margin-bottom: 12px;
+}
+
+.overview-card h3 {
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+
+.overview-card p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.workflow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.workflow div {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+/* =========================================
+   CONTENT CARDS
+========================================= */
+
+.content-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+}
+
+.content-card h3 {
+    color: var(--primary-dark);
+    margin-bottom: 14px;
+    font-size: 18px;
+}
+
+.content-card > p {
+    color: var(--muted);
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+
+/* =========================================
+   FORMS
+========================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 20px 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+    min-width: 0;
+}
+
+.form-group label {
+    color: #405448;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #d4dfd6;
+    background: #fbfdfb;
+    color: var(--text);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(35, 122, 69, 0.11);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================
+   MAPS
+========================================= */
+
+.map-selection {
+    margin: 25px 0;
+}
+
+.map-selection h3 {
+    margin-bottom: 5px;
+}
+
+.map-selection p,
+.map-hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.map {
+    width: 100%;
+    height: 450px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    z-index: 1;
+    overflow: hidden;
+    background: #e7eee8;
+}
+
+.info-message {
+    background: #f0f6f0;
+    color: #506557;
+    border: 1px solid #dce9dd;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 14px 0;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.leaflet-container {
+    font-family: inherit;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.primary-btn,
+.action-btn {
+    background: var(--primary);
+    color: white;
+}
+
+.primary-btn:hover:not(:disabled),
+.action-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.secondary-btn {
+    background: #eaf1eb;
+    color: var(--primary-dark);
+    border: 1px solid #d5e4d7;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background: #dcebdd;
+}
+
+.danger-btn {
+    background: #fff0ef;
+    color: var(--danger);
+    border: 1px solid #f3d1ce;
+}
+
+.danger-btn:hover:not(:disabled) {
+    background: #ffe1df;
+}
+
+.action-btn {
+    font-size: 13px;
+}
+
+
+/* =========================================
+   FIELD AND SOIL LISTS
+========================================= */
+
+.farm-card,
+.soil-record {
+    background: #fbfdfb;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin: 12px 0;
+}
+
+.farm-card h4,
+.soil-record h4 {
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+
+.farm-card p,
+.soil-record p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 4px 0;
+}
+
+.farm-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+
+/* =========================================
+   ANALYSIS LAYOUT AND RESULTS
+========================================= */
+
+.analysis-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.8fr);
+    gap: 20px;
+    align-items: start;
+}
+
+#results {
+    min-height: 180px;
+    overflow-wrap: anywhere;
+}
+
+.result-card {
+    background: #fbfdfb;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+    min-width: 0;
+}
+
+.result-card h2,
+.result-card h3,
+.result-card h4 {
+    color: var(--primary-dark);
+    margin-bottom: 12px;
+}
+
+.result-card p {
+    margin: 8px 0;
+    line-height: 1.7;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+
+th {
+    background: #edf5ee;
+    color: var(--primary-dark);
+}
+
+.weather-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.weather-stat {
+    background: var(--primary-light);
+    padding: 15px;
+    border-radius: 9px;
+    color: #52665a;
+    font-size: 13px;
+}
+
+.weather-stat strong {
+    display: block;
+    color: var(--primary-dark);
+    font-size: 19px;
+    margin-top: 7px;
+}
+
+.chart-container {
+    width: 100%;
+    margin-top: 18px;
+    overflow: hidden;
+    background: #f1f6f1;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.ndvi-chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 180px;
+}
+
+.chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #28a65a;
+    display: inline-block;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading {
+    text-align: center;
+    padding: 40px 15px;
+    color: var(--primary);
+}
+
+.spinner {
+    border: 4px solid #e0ebe2;
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 18px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================
+   NOTIFICATIONS
+========================================= */
+
+.notification {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    max-width: min(420px, calc(100vw - 40px));
+    padding: 14px 20px;
+    border-radius: 9px;
+    background: #344b3b;
+    color: white;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.18);
+    z-index: 3000;
+    display: none;
+    overflow-wrap: anywhere;
+}
+
+.notification.show {
+    display: block;
+}
+
+.notification.success {
+    background: #237a45;
+}
+
+.notification.error {
+    background: #b9362c;
+}
+
+.notification.info {
+    background: #315f80;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer {
+    text-align: center;
+    padding: 25px 10px;
+    margin-top: 25px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) {
+    .overview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .workflow {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .analysis-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+    .app-container {
+        padding: 12px;
+    }
+
+    .app-header {
+        padding: 22px 18px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .app-header h1 {
+        font-size: 26px;
+    }
+
+    .main-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .nav-btn {
+        padding: 11px 8px;
+        font-size: 12px;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .content-card {
+        padding: 17px;
+    }
+
+    .welcome-card {
+        padding: 22px;
+    }
+
+    .welcome-card h2 {
+        font-size: 21px;
+    }
+
+    .map {
+        height: 350px;
+    }
+
+    .inline-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .weather-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-card {
+        padding: 15px;
+    }
+
+    .notification {
+        top: 10px;
+        right: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .weather-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.danger-btn {
+    background: #c0392b;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.danger-btn:hover {
+    background: #962d22;
+}
+
+.danger-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+</style>
 </head>
 
 <body>
@@ -26,9 +863,9 @@
                 href="https://github.com/Vruti26/Agritech"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Agritch is under development. Open its GitHub repository."
+                aria-label="Agritch is under construction. View the project repository on GitHub"
             >
-                ↗ Project under development · View on GitHub
+                Project under construction · View development on GitHub ↗
             </a>
         </div>
 
@@ -494,7 +1331,1590 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
-<script src="script.js"></script>
+<script>
+/* Agritch application logic (inlined from script.js) */
+
+"use strict";
+
+/* =========================================================
+   AGRITCH - FRONTEND APPLICATION
+   Backend: Flask
+   Satellite: Sentinel-2
+   Weather: Open-Meteo
+   Maps: Leaflet
+========================================================= */
+
+const API_BASE_URL = "http://127.0.0.1:5000";
+
+const $ = (id) => document.getElementById(id);
+
+let farmMap = null;
+let analysisMap = null;
+
+let farmDrawnItems = null;
+let analysisDrawnItems = null;
+
+let farmGeometry = null;
+let analysisGeometry = null;
+
+let notificationTimer = null;
+
+
+/* =========================================================
+   GENERAL HELPERS
+========================================================= */
+
+async function apiRequest(endpoint, options = {}) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data.error ||
+            data.details ||
+            `Request failed with status ${response.status}`
+        );
+    }
+
+    return data;
+}
+
+
+function showNotification(message, type = "success") {
+    const notification = $("notification");
+
+    if (!notification) return;
+
+    notification.textContent = message;
+    notification.className = `notification show ${type}`;
+
+    clearTimeout(notificationTimer);
+
+    notificationTimer = setTimeout(() => {
+        notification.className = "notification";
+    }, 4000);
+}
+
+
+function setButtonLoading(button, loading, loadingText = "Please wait...") {
+    if (!button) return;
+
+    if (loading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = loadingText;
+        button.disabled = true;
+    } else {
+        button.textContent =
+            button.dataset.originalText || button.textContent;
+
+        button.disabled = false;
+    }
+}
+
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
+}
+
+
+function formatNumber(value, decimals = 2) {
+    const number = Number(value);
+
+    return Number.isFinite(number)
+        ? number.toFixed(decimals)
+        : "Unavailable";
+}
+
+
+function formatDate(value) {
+    if (!value) return "Date unavailable";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+
+function getInputValue(id) {
+    const element = $(id);
+
+    if (!element) return "";
+
+    return element.value.trim();
+}
+
+
+function getOptionalNumber(id) {
+    const value = getInputValue(id);
+
+    if (value === "") return null;
+
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : null;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showSection(sectionId) {
+    document.querySelectorAll(".page-section").forEach(section => {
+        section.classList.toggle("active", section.id === sectionId);
+    });
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.dataset.section === sectionId
+        );
+    });
+
+    if (sectionId === "farmsSection" && farmMap) {
+        setTimeout(() => farmMap.invalidateSize(), 150);
+    }
+
+    if (sectionId === "analysisSection" && analysisMap) {
+        setTimeout(() => analysisMap.invalidateSize(), 150);
+    }
+}
+
+
+function initializeNavigation() {
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            showSection(button.dataset.section);
+        });
+    });
+
+    document.querySelectorAll("[data-go]").forEach(button => {
+        button.addEventListener("click", () => {
+            showSection(button.dataset.go);
+        });
+    });
+}
+
+
+/* =========================================================
+   BACKEND CONNECTION
+========================================================= */
+
+async function checkBackendConnection() {
+    const dot = $("statusDot");
+    const text = $("statusText");
+
+    try {
+        await apiRequest("/api/health");
+
+        if (dot) {
+            dot.className = "status-dot connected";
+        }
+
+        if (text) {
+            text.textContent = "Backend: Connected";
+        }
+
+        return true;
+
+    } catch (error) {
+        if (dot) {
+            dot.className = "status-dot disconnected";
+        }
+
+        if (text) {
+            text.textContent = "Backend: Disconnected";
+        }
+
+        return false;
+    }
+}
+
+
+/* =========================================================
+   LEAFLET MAPS
+========================================================= */
+
+
+function createBaseMap(elementId) {
+    const element = $(elementId);
+
+    if (!element || typeof L === "undefined") {
+        console.error(`Map element or Leaflet unavailable: ${elementId}`);
+        return null;
+    }
+
+    const map = L.map(elementId).setView(
+        [23.0225, 72.5714],
+        10
+    );
+
+    // Satellite imagery
+    L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+            attribution: "Tiles &copy; Esri and its contributors",
+            maxZoom: 19
+        }
+    ).addTo(map);
+
+    // Transparent reference layer: roads, place names and boundaries
+    L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        {
+            attribution: "Labels &copy; Esri",
+            maxZoom: 19,
+            pane: "overlayPane"
+        }
+    ).addTo(map);
+
+    return map;
+}
+
+
+
+function setupDrawing(map, target) {
+    if (!map || typeof L.Control.Draw === "undefined") {
+        return null;
+    }
+
+    const drawnItems = new L.FeatureGroup();
+
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+        position: "topright",
+
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                shapeOptions: {
+                    color: "#16834a"
+                }
+            },
+
+            rectangle: {
+                shapeOptions: {
+                    color: "#16834a"
+                }
+            },
+
+            polyline: false,
+            circle: false,
+            circlemarker: false,
+            marker: false
+        },
+
+        edit: {
+            featureGroup: drawnItems,
+            remove: true
+        }
+    });
+
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, event => {
+        drawnItems.clearLayers();
+
+        const layer = event.layer;
+
+        drawnItems.addLayer(layer);
+
+        const geometry = layer.toGeoJSON().geometry;
+
+        if (target === "farm") {
+            farmGeometry = geometry;
+            updateBoundaryInfo("farm");
+        } else {
+            analysisGeometry = geometry;
+            updateBoundaryInfo("analysis");
+        }
+    });
+
+    map.on(L.Draw.Event.EDITED, () => {
+        const layer = drawnItems.getLayers()[0];
+
+        if (!layer) return;
+
+        const geometry = layer.toGeoJSON().geometry;
+
+        if (target === "farm") {
+            farmGeometry = geometry;
+            updateBoundaryInfo("farm");
+        } else {
+            analysisGeometry = geometry;
+            updateBoundaryInfo("analysis");
+        }
+    });
+
+    map.on(L.Draw.Event.DELETED, () => {
+        if (target === "farm") {
+            farmGeometry = null;
+            updateBoundaryInfo("farm");
+        } else {
+            analysisGeometry = null;
+            updateBoundaryInfo("analysis");
+        }
+    });
+
+    return drawnItems;
+}
+
+
+function initializeMaps() {
+    farmMap = createBaseMap("farmMap");
+    analysisMap = createBaseMap("analysisMap");
+
+    farmDrawnItems = setupDrawing(farmMap, "farm");
+    analysisDrawnItems = setupDrawing(analysisMap, "analysis");
+}
+
+
+async function updateBoundaryInfo(target) {
+    const geometry = target === "farm"
+        ? farmGeometry
+        : analysisGeometry;
+
+    const infoElement = target === "farm"
+        ? $("farmBoundaryInfo")
+        : $("analysisFieldInfo");
+
+    if (!infoElement) return;
+
+    if (!geometry) {
+        infoElement.textContent = "No boundary selected.";
+        return;
+    }
+
+    infoElement.textContent = "Boundary selected. Calculating field area...";
+
+    try {
+        const result = await apiRequest("/api/fields/analyse", {
+            method: "POST",
+            body: JSON.stringify(geometry)
+        });
+
+        const analysis = result.field_analysis || {};
+
+        const area = analysis.area_hectares;
+
+        infoElement.textContent = Number.isFinite(Number(area))
+            ? `Boundary selected | Area: ${formatNumber(area, 4)} hectares`
+            : "Boundary selected. Area information unavailable.";
+
+    } catch (error) {
+        infoElement.textContent =
+            `Boundary selected. ${error.message}`;
+    }
+}
+
+
+function clearMapBoundary(target) {
+    if (target === "farm") {
+        if (farmDrawnItems) farmDrawnItems.clearLayers();
+
+        farmGeometry = null;
+        updateBoundaryInfo("farm");
+
+    } else {
+        if (analysisDrawnItems) analysisDrawnItems.clearLayers();
+
+        analysisGeometry = null;
+        updateBoundaryInfo("analysis");
+
+        const button = $("analyzeBtn");
+
+        if (button) button.disabled = true;
+    }
+}
+
+
+function loadGeometryOnMap(geometry, target) {
+    const map = target === "farm" ? farmMap : analysisMap;
+    const drawnItems = target === "farm"
+        ? farmDrawnItems
+        : analysisDrawnItems;
+
+    if (!map || !drawnItems || !geometry) return;
+
+    drawnItems.clearLayers();
+
+    const feature = {
+        type: "Feature",
+        properties: {},
+        geometry
+    };
+
+    const layer = L.geoJSON(feature, {
+        style: {
+            color: "#16834a",
+            weight: 3,
+            fillOpacity: 0.2
+        }
+    });
+
+    layer.eachLayer(item => drawnItems.addLayer(item));
+
+    const bounds = drawnItems.getBounds();
+
+    if (bounds.isValid()) {
+        map.fitBounds(bounds, {
+            padding: [25, 25],
+            maxZoom: 16
+        });
+    }
+
+    if (target === "farm") {
+        farmGeometry = geometry;
+        updateBoundaryInfo("farm");
+    } else {
+        analysisGeometry = geometry;
+        updateBoundaryInfo("analysis");
+
+        const button = $("analyzeBtn");
+
+        if (button) button.disabled = false;
+    }
+}
+
+
+/* =========================================================
+   FARM REGISTRATION
+========================================================= */
+
+async function registerFarm(event) {
+    event.preventDefault();
+
+    if (!farmGeometry) {
+        showNotification(
+            "Please draw your farm boundary on the map first.",
+            "error"
+        );
+        return;
+    }
+
+    const button = $("registerFarmBtn");
+
+    const farmData = {
+        farm_name: getInputValue("farmName"),
+        district: getInputValue("district"),
+        village: getInputValue("village") || null,
+        soil_type: getInputValue("soilType") || null,
+        water_source: getInputValue("waterSource") || null,
+        irrigation_method: getInputValue("irrigationMethod") || null,
+        geometry_geojson: farmGeometry
+    };
+
+    if (!farmData.farm_name || !farmData.district) {
+        showNotification(
+            "Farm name and district are required.",
+            "error"
+        );
+        return;
+    }
+
+    setButtonLoading(button, true, "Registering...");
+
+    try {
+        const result = await apiRequest("/api/farms", {
+            method: "POST",
+            body: JSON.stringify(farmData)
+        });
+
+        showNotification(
+            result.message || "Farm registered successfully."
+        );
+
+        $("farmForm").reset();
+
+        clearMapBoundary("farm");
+
+        await loadFarms();
+
+    } catch (error) {
+        showNotification(
+            `Farm registration failed: ${error.message}`,
+            "error"
+        );
+
+    } finally {
+        setButtonLoading(button, false);
+    }
+}
+
+
+/* =========================================================
+   FARM LIST
+========================================================= */
+
+async function loadFarms() {
+    const container = $("farmsList");
+
+    if (container) {
+        container.innerHTML = '<p class="muted">Loading farms...</p>';
+    }
+
+    try {
+        const result = await apiRequest("/api/farms");
+
+        const farms = result.farms || [];
+
+        renderFarms(farms);
+        populateFarmSelect(farms);
+
+        return farms;
+
+    } catch (error) {
+        if (container) {
+            container.textContent =
+                `Unable to load farms: ${error.message}`;
+        }
+
+        showNotification(
+            `Could not load farms: ${error.message}`,
+            "error"
+        );
+
+        return [];
+    }
+}
+
+
+
+function renderFarms(farms) {
+    const container = $("farmsList");
+
+    if (!container) return;
+
+    if (!farms.length) {
+        container.innerHTML =
+            '<p class="muted">No farms registered yet. Register your first farm above.</p>';
+        return;
+    }
+
+    container.innerHTML = farms.map(farm => `
+        <div class="farm-card">
+            <div class="farm-card-content">
+                <h3>${escapeHTML(farm.farm_name)}</h3>
+
+                <p>
+                    <strong>District:</strong>
+                    ${escapeHTML(farm.district)}
+                </p>
+
+                <p>
+                    <strong>Village:</strong>
+                    ${escapeHTML(farm.village || "Not provided")}
+                </p>
+
+                <p>
+                    <strong>Area:</strong>
+                    ${formatNumber(farm.area_hectares, 2)} hectares
+                </p>
+
+                <p>
+                    <strong>Soil:</strong>
+                    ${escapeHTML(farm.soil_type || "Not provided")}
+                </p>
+
+                <p>
+                    <strong>Water source:</strong>
+                    ${escapeHTML(farm.water_source || "Not provided")}
+                </p>
+
+                <p>
+                    <strong>Registered:</strong>
+                    ${formatDate(farm.created_at)}
+                </p>
+
+                <div class="farm-card-actions">
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        data-farm-action="soil"
+                        data-farm-id="${Number(farm.id)}">
+                        Add Soil Test
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        data-farm-action="analyse"
+                        data-farm-id="${Number(farm.id)}">
+                        Analyse This Farm
+                    </button>
+
+                    <button
+                        type="button"
+                        class="danger-btn"
+                        data-farm-action="delete"
+                        data-farm-id="${Number(farm.id)}">
+                        Delete Farm
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
+
+
+// Delete a farm after user confirmation.
+async function deleteFarm(farmId) {
+    const confirmed = window.confirm(
+        "Are you sure you want to delete this farm?\n\n" +
+        "This will permanently delete the farm and all its associated soil-test records.\n\n" +
+        "This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+        await apiRequest(`/api/farms/${farmId}`, {
+            method: "DELETE"
+        });
+
+        showNotification(
+            "Farm deleted successfully.",
+            "success"
+        );
+
+        await loadFarms();
+
+    } catch (error) {
+        showNotification(
+            `Unable to delete farm: ${error.message}`,
+            "error"
+        );
+    }
+}
+
+
+function populateFarmSelect(farms) {
+    const select = $("soilFarmId");
+
+    if (!select) return;
+
+    const previousValue = select.value;
+
+    select.innerHTML =
+        '<option value="">Select a farm</option>';
+
+    farms.forEach(farm => {
+        const option = document.createElement("option");
+
+        option.value = farm.id;
+        option.textContent =
+            `${farm.farm_name} - ${farm.district}`;
+
+        select.appendChild(option);
+    });
+
+    if (farms.some(farm => String(farm.id) === previousValue)) {
+        select.value = previousValue;
+    }
+}
+
+
+
+async function handleFarmAction(event) {
+    const button = event.target.closest("[data-farm-action]");
+
+    if (!button) return;
+
+    const farmId = Number(button.dataset.farmId);
+    const action = button.dataset.farmAction;
+
+    if (!Number.isInteger(farmId) || farmId <= 0) {
+        showNotification("Invalid farm ID.", "error");
+        return;
+    }
+
+    // Handle deletion separately.
+    if (action === "delete") {
+        await deleteFarm(farmId);
+        return;
+    }
+
+    try {
+        const result = await apiRequest(`/api/farms/${farmId}`);
+
+        const farm = result.farm;
+
+        if (action === "soil") {
+            showSection("soilSection");
+
+            $("soilFarmId").value = String(farmId);
+
+            await loadSoilHistory(farmId);
+
+        } else if (action === "analyse") {
+            showSection("analysisSection");
+
+            loadGeometryOnMap(
+                farm.geometry_geojson,
+                "analysis"
+            );
+
+            showNotification(
+                `Loaded ${farm.farm_name} for field analysis.`
+            );
+        }
+
+    } catch (error) {
+        showNotification(
+            `Unable to open farm: ${error.message}`,
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   SOIL TEST REGISTRATION
+========================================================= */
+
+async function saveSoilTest(event) {
+    event.preventDefault();
+
+    const farmId = getInputValue("soilFarmId");
+
+    if (!farmId) {
+        showNotification("Please select a farm.", "error");
+        return;
+    }
+
+    const soilData = {
+        sample_date: getInputValue("sampleDate") || null,
+        ph: getOptionalNumber("soilPH"),
+        electrical_conductivity: getOptionalNumber("soilEC"),
+        organic_carbon: getOptionalNumber("organicCarbon"),
+        nitrogen: getOptionalNumber("nitrogen"),
+        phosphorus: getOptionalNumber("phosphorus"),
+        potassium: getOptionalNumber("potassium"),
+        soil_texture: getInputValue("soilTexture") || null,
+        laboratory_name: getInputValue("laboratoryName") || null,
+        notes: getInputValue("soilNotes") || null
+    };
+
+    const button = $("soilForm").querySelector(
+        'button[type="submit"]'
+    );
+
+    setButtonLoading(button, true, "Saving...");
+
+    try {
+        const result = await apiRequest(
+            `/api/farms/${farmId}/soil-tests`,
+            {
+                method: "POST",
+                body: JSON.stringify(soilData)
+            }
+        );
+
+        showNotification(
+            result.soil_test?.message || "Soil test saved successfully."
+        );
+
+        $("soilForm").reset();
+
+        $("soilFarmId").value = farmId;
+
+        await loadSoilHistory(farmId);
+
+    } catch (error) {
+        showNotification(
+            `Unable to save soil test: ${error.message}`,
+            "error"
+        );
+
+    } finally {
+        setButtonLoading(button, false);
+    }
+}
+
+
+/* =========================================================
+   SOIL TEST HISTORY
+========================================================= */
+
+async function loadSoilHistory(farmId) {
+    const container = $("soilHistory");
+
+    if (!container || !farmId) return;
+
+    container.innerHTML =
+        '<p class="muted">Loading soil test history...</p>';
+
+    try {
+        const result = await apiRequest(
+            `/api/farms/${farmId}/soil-tests`
+        );
+
+        renderSoilHistory(result.soil_tests || []);
+
+    } catch (error) {
+        container.textContent =
+            `Unable to load soil history: ${error.message}`;
+    }
+}
+
+
+function renderSoilHistory(tests) {
+    const container = $("soilHistory");
+
+    if (!container) return;
+
+    if (!tests.length) {
+        container.innerHTML =
+            '<p class="muted">No soil tests saved for this farm yet.</p>';
+        return;
+    }
+
+    container.innerHTML = tests.map(test => `
+        <div class="soil-history-card">
+            <h3>Soil Test - ${formatDate(test.sample_date)}</h3>
+
+            <div class="soil-values-grid">
+                <p><strong>pH:</strong> ${formatNumber(test.ph)}</p>
+
+                <p>
+                    <strong>EC:</strong>
+                    ${formatNumber(test.electrical_conductivity)}
+                </p>
+
+                <p>
+                    <strong>Organic carbon:</strong>
+                    ${formatNumber(test.organic_carbon)}
+                </p>
+
+                <p><strong>Nitrogen:</strong> ${formatNumber(test.nitrogen)}</p>
+
+                <p><strong>Phosphorus:</strong> ${formatNumber(test.phosphorus)}</p>
+
+                <p><strong>Potassium:</strong> ${formatNumber(test.potassium)}</p>
+
+                <p>
+                    <strong>Texture:</strong>
+                    ${escapeHTML(test.soil_texture || "Not provided")}
+                </p>
+
+                <p>
+                    <strong>Laboratory:</strong>
+                    ${escapeHTML(test.laboratory_name || "Not provided")}
+                </p>
+            </div>
+
+            ${test.notes ? `
+                <p>
+                    <strong>Notes:</strong>
+                    ${escapeHTML(test.notes)}
+                </p>
+            ` : ""}
+        </div>
+    `).join("");
+}
+
+
+/* =========================================================
+   FIELD ANALYSIS
+========================================================= */
+
+async function analyseField() {
+    if (!analysisGeometry) {
+        showNotification(
+            "Please draw a field boundary or select a registered farm.",
+            "error"
+        );
+        return;
+    }
+
+    const startDate = getInputValue("startDate");
+    const endDate = getInputValue("endDate");
+
+    if (!startDate || !endDate) {
+        showNotification(
+            "Please select both analysis dates.",
+            "error"
+        );
+        return;
+    }
+
+    if (startDate > endDate) {
+        showNotification(
+            "Start date cannot be after end date.",
+            "error"
+        );
+        return;
+    }
+
+    const button = $("analyzeBtn");
+
+    setButtonLoading(button, true, "Analysing field...");
+
+    const results = $("results");
+
+    results.innerHTML =
+        '<p class="muted">Retrieving satellite and weather information. This may take some time...</p>';
+
+    const requestBody = {
+        geometry: analysisGeometry,
+        start_date: startDate,
+        end_date: endDate,
+        forecast_days: 7
+    };
+
+    const [ndviResult, weatherResult] = await Promise.allSettled([
+        apiRequest("/api/fields/ndvi", {
+            method: "POST",
+            body: JSON.stringify(requestBody)
+        }),
+
+        apiRequest("/api/fields/weather", {
+            method: "POST",
+            body: JSON.stringify(requestBody)
+        })
+    ]);
+
+    let html = "";
+
+    if (ndviResult.status === "fulfilled") {
+        html += renderNDVIReport(ndviResult.value);
+    } else {
+        html += renderErrorCard(
+            "Satellite analysis",
+            ndviResult.reason.message
+        );
+    }
+
+    if (weatherResult.status === "fulfilled") {
+        html += renderWeatherReport(weatherResult.value);
+    } else {
+        html += renderErrorCard(
+            "Weather analysis",
+            weatherResult.reason.message
+        );
+    }
+
+    results.innerHTML = html;
+
+    const successful =
+        ndviResult.status === "fulfilled" ||
+        weatherResult.status === "fulfilled";
+
+    showNotification(
+        successful
+            ? "Field analysis completed. Review the available results."
+            : "Both analysis requests failed. Check the backend and try again.",
+        successful ? "success" : "error"
+    );
+
+    setButtonLoading(button, false);
+}
+
+
+function renderErrorCard(title, message) {
+    return `
+        <div class="result-card">
+            <h3>${escapeHTML(title)} unavailable</h3>
+            <p class="error-text">${escapeHTML(message)}</p>
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   NDVI REPORT
+========================================================= */
+
+function extractNDVISummary(response) {
+    const field = response.field_analysis || response;
+
+    return (
+        field.ndvi_summary ||
+        field.summary ||
+        field
+    );
+}
+
+
+function renderNDVIReport(response) {
+    const summary = extractNDVISummary(response);
+
+    const observations = Array.isArray(summary.observations)
+        ? summary.observations
+        : [];
+
+    const validObservations = observations
+        .filter(item =>
+            item.mean_ndvi !== null &&
+            item.mean_ndvi !== undefined &&
+            Number.isFinite(Number(item.mean_ndvi))
+        )
+        .sort((a, b) =>
+            new Date(a.interval_start) - new Date(b.interval_start)
+        );
+
+    if (!validObservations.length) {
+        return `
+            <div class="result-card">
+                <h3>🛰️ Satellite NDVI Analysis</h3>
+                <p>No usable NDVI observations were returned for this period.</p>
+                <p class="muted">
+                    This can happen because of cloud cover, quality masking,
+                    or unavailable satellite acquisitions.
+                </p>
+            </div>
+        `;
+    }
+
+    const latest = validObservations[validObservations.length - 1];
+
+    const previous = validObservations.length > 1
+        ? validObservations[validObservations.length - 2]
+        : null;
+
+    let trendText = "Only one usable observation is available.";
+
+    if (previous) {
+        const difference =
+            Number(latest.mean_ndvi) - Number(previous.mean_ndvi);
+
+        if (difference > 0.02) {
+            trendText = "The latest NDVI is higher than the previous observation.";
+        } else if (difference < -0.02) {
+            trendText = "The latest NDVI is lower than the previous observation.";
+        } else {
+            trendText = "The latest and previous NDVI observations are relatively similar.";
+        }
+    }
+
+    const warningCount = validObservations.reduce(
+        (total, item) =>
+            total + (item.quality_warnings || []).length,
+        0
+    );
+
+    return `
+        <div class="result-card">
+            <h3>🛰️ Satellite NDVI Analysis</h3>
+
+            <p>
+                <strong>Satellite source:</strong>
+                Sentinel-2
+            </p>
+
+            <p>
+                <strong>Latest observation:</strong>
+                ${formatDate(latest.interval_start)}
+            </p>
+
+            <div class="analysis-metrics">
+                <div class="metric-card">
+                    <span>Latest mean NDVI</span>
+                    <strong>${formatNumber(latest.mean_ndvi, 4)}</strong>
+                </div>
+
+                <div class="metric-card">
+                    <span>Usable observations</span>
+                    <strong>${validObservations.length}</strong>
+                </div>
+
+                <div class="metric-card">
+                    <span>Quality warnings</span>
+                    <strong>${warningCount}</strong>
+                </div>
+            </div>
+
+            <h4>What changed?</h4>
+
+            <p>${escapeHTML(trendText)}</p>
+
+            <p class="muted">
+                NDVI indicates vegetation greenness. It is not, by itself,
+                a crop-health diagnosis or proof of a particular cause.
+            </p>
+
+            ${renderNDVIChart(validObservations)}
+
+            <h4>Observation details</h4>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mean NDVI</th>
+                            <th>Minimum</th>
+                            <th>Maximum</th>
+                            <th>Valid pixels</th>
+                            <th>Coverage</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${validObservations.map(item => `
+                            <tr>
+                                <td>${formatDate(item.interval_start)}</td>
+                                <td>${formatNumber(item.mean_ndvi, 4)}</td>
+                                <td>${formatNumber(item.min_ndvi, 4)}</td>
+                                <td>${formatNumber(item.max_ndvi, 4)}</td>
+                                <td>${item.valid_pixel_count ?? "Unavailable"}</td>
+                                <td>
+                                    ${item.valid_pixel_percentage !== null &&
+                                      item.valid_pixel_percentage !== undefined
+                                        ? `${item.valid_pixel_percentage}%`
+                                        : "Unavailable"}
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+
+            ${warningCount > 0 ? `
+                <div class="warning-message">
+                    Some observations contain data-quality warnings.
+                    Review coverage and pixel counts before interpreting the trend.
+                </div>
+            ` : ""}
+        </div>
+    `;
+}
+
+
+function renderNDVIChart(observations) {
+    const width = 700;
+    const height = 230;
+    const padding = 40;
+
+    const values = observations.map(item =>
+        Number(item.mean_ndvi)
+    );
+
+    const min = Math.min(0, ...values);
+    const max = Math.max(1, ...values);
+
+    const range = max - min || 1;
+
+    const points = values.map((value, index) => {
+        const x = padding +
+            index * (width - padding * 2) /
+            Math.max(values.length - 1, 1);
+
+        const y = height - padding -
+            ((value - min) / range) *
+            (height - padding * 2);
+
+        return { x, y, value };
+    });
+
+    const pointString = points
+        .map(point => `${point.x},${point.y}`)
+        .join(" ");
+
+    return `
+        <h4>NDVI trend</h4>
+
+        <div class="chart-container">
+            <svg
+                viewBox="0 0 ${width} ${height}"
+                role="img"
+                aria-label="NDVI observations trend chart"
+                style="width:100%;height:auto;">
+
+                <line
+                    x1="${padding}"
+                    y1="${height - padding}"
+                    x2="${width - padding}"
+                    y2="${height - padding}"
+                    stroke="currentColor"
+                    opacity="0.3"/>
+
+                <line
+                    x1="${padding}"
+                    y1="${padding}"
+                    x2="${padding}"
+                    y2="${height - padding}"
+                    stroke="currentColor"
+                    opacity="0.3"/>
+
+                <polyline
+                    points="${pointString}"
+                    fill="none"
+                    stroke="#16834a"
+                    stroke-width="3"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"/>
+
+                ${points.map(point => `
+                    <circle
+                        cx="${point.x}"
+                        cy="${point.y}"
+                        r="5"
+                        fill="#16834a">
+                        <title>NDVI: ${point.value.toFixed(4)}</title>
+                    </circle>
+                `).join("")}
+
+                <text
+                    x="${padding}"
+                    y="${height - 10}"
+                    fill="currentColor"
+                    font-size="11">
+                    ${escapeHTML(formatDate(observations[0].interval_start))}
+                </text>
+
+                <text
+                    x="${width - padding}"
+                    y="${height - 10}"
+                    text-anchor="end"
+                    fill="currentColor"
+                    font-size="11">
+                    ${escapeHTML(formatDate(observations[observations.length - 1].interval_start))}
+                </text>
+            </svg>
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   WEATHER REPORT
+========================================================= */
+
+function renderWeatherReport(response) {
+    const fieldWeather = response.field_weather || response;
+
+    const historical = fieldWeather.historical || {};
+    const forecast = fieldWeather.forecast || {};
+
+    const current = forecast.current || {};
+    const daily = forecast.daily || {};
+
+    const historicalDaily = historical.daily || {};
+    const historicalHourly = historical.hourly || {};
+
+    return `
+        <div class="result-card">
+            <h3>🌦️ Weather Intelligence</h3>
+
+            <p class="muted">
+                Weather information is based on Open-Meteo data for a
+                representative point inside the selected field.
+                The weather grid location may not exactly match the field.
+            </p>
+
+            ${renderCurrentWeather(current)}
+
+            ${renderForecast(daily)}
+
+            ${renderHistoricalWeather(
+                historicalDaily,
+                historicalHourly
+            )}
+
+            <p class="data-source">
+                Historical source: ${escapeHTML(historical.source || "Open-Meteo Historical Weather API")}
+                <br>
+                Forecast source: ${escapeHTML(forecast.source || "Open-Meteo Forecast API")}
+            </p>
+        </div>
+    `;
+}
+
+
+function renderCurrentWeather(current) {
+    if (!Object.keys(current).length) {
+        return "";
+    }
+
+    return `
+        <h4>Current weather</h4>
+
+        <div class="analysis-metrics">
+            <div class="metric-card">
+                <span>Temperature</span>
+                <strong>${formatNumber(current.temperature_2m, 1)} °C</strong>
+            </div>
+
+            <div class="metric-card">
+                <span>Humidity</span>
+                <strong>${formatNumber(current.relative_humidity_2m, 0)}%</strong>
+            </div>
+
+            <div class="metric-card">
+                <span>Rainfall</span>
+                <strong>${formatNumber(current.precipitation, 1)} mm</strong>
+            </div>
+
+            <div class="metric-card">
+                <span>Wind speed</span>
+                <strong>${formatNumber(current.wind_speed_10m, 1)} km/h</strong>
+            </div>
+        </div>
+    `;
+}
+
+
+function renderForecast(daily) {
+    const dates = daily.time || [];
+
+    if (!dates.length) {
+        return `
+            <h4>Weather forecast</h4>
+            <p class="muted">Forecast information is unavailable.</p>
+        `;
+    }
+
+    return `
+        <h4>Weather forecast</h4>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Min °C</th>
+                        <th>Max °C</th>
+                        <th>Rain mm</th>
+                        <th>Rain chance</th>
+                        <th>ET₀ mm</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${dates.map((date, index) => `
+                        <tr>
+                            <td>${formatDate(date)}</td>
+
+                            <td>${formatNumber(
+                                daily.temperature_2m_min?.[index], 1
+                            )}</td>
+
+                            <td>${formatNumber(
+                                daily.temperature_2m_max?.[index], 1
+                            )}</td>
+
+                            <td>${formatNumber(
+                                daily.precipitation_sum?.[index], 1
+                            )}</td>
+
+                            <td>${formatNumber(
+                                daily.precipitation_probability_max?.[index], 0
+                            )}%</td>
+
+                            <td>${formatNumber(
+                                daily.et0_fao_evapotranspiration?.[index], 1
+                            )}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+
+function renderHistoricalWeather(daily, hourly) {
+    const dates = daily.time || [];
+
+    if (!dates.length) {
+        return `
+            <h4>Historical weather</h4>
+            <p class="muted">Historical weather information is unavailable.</p>
+        `;
+    }
+
+    const rainfallValues = daily.precipitation_sum || [];
+
+    const totalRainfall = rainfallValues.reduce(
+        (total, value) => total + (Number(value) || 0),
+        0
+    );
+
+    const averageTemperature = (daily.temperature_2m_mean || [])
+        .filter(value => value !== null)
+        .map(Number);
+
+    const average = averageTemperature.length
+        ? averageTemperature.reduce((sum, value) => sum + value, 0) /
+          averageTemperature.length
+        : null;
+
+    const moistureValues = (hourly.soil_moisture_0_to_7cm || [])
+        .filter(value => value !== null)
+        .map(Number);
+
+    const averageMoisture = moistureValues.length
+        ? moistureValues.reduce((sum, value) => sum + value, 0) /
+          moistureValues.length
+        : null;
+
+    return `
+        <h4>Historical weather summary</h4>
+
+        <div class="analysis-metrics">
+            <div class="metric-card">
+                <span>Total rainfall</span>
+                <strong>${formatNumber(totalRainfall, 1)} mm</strong>
+            </div>
+
+            <div class="metric-card">
+                <span>Average temperature</span>
+                <strong>
+                    ${average === null
+                        ? "Unavailable"
+                        : `${formatNumber(average, 1)} °C`}
+                </strong>
+            </div>
+
+            <div class="metric-card">
+                <span>Modelled topsoil moisture</span>
+                <strong>
+                    ${averageMoisture === null
+                        ? "Unavailable"
+                        : `${formatNumber(averageMoisture, 3)} m³/m³`}
+                </strong>
+            </div>
+        </div>
+
+        <p class="muted">
+            Soil moisture is modelled weather-grid data, not a direct
+            measurement from a sensor installed in this field.
+        </p>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Mean temperature °C</th>
+                        <th>Rainfall mm</th>
+                        <th>ET₀ mm</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${dates.map((date, index) => `
+                        <tr>
+                            <td>${formatDate(date)}</td>
+
+                            <td>${formatNumber(
+                                daily.temperature_2m_mean?.[index], 1
+                            )}</td>
+
+                            <td>${formatNumber(
+                                daily.precipitation_sum?.[index], 1
+                            )}</td>
+
+                            <td>${formatNumber(
+                                daily.et0_fao_evapotranspiration?.[index], 1
+                            )}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   EVENT LISTENERS
+========================================================= */
+
+function initializeEventListeners() {
+    $("farmForm")?.addEventListener("submit", registerFarm);
+
+    $("soilForm")?.addEventListener("submit", saveSoilTest);
+
+    $("refreshFarmsBtn")?.addEventListener("click", loadFarms);
+
+    $("farmsList")?.addEventListener("click", handleFarmAction);
+
+    $("soilFarmId")?.addEventListener("change", event => {
+        if (event.target.value) {
+            loadSoilHistory(event.target.value);
+        } else {
+            $("soilHistory").innerHTML =
+                '<p class="muted">Select a farm to view its soil history.</p>';
+        }
+    });
+
+    $("analyzeBtn")?.addEventListener("click", analyseField);
+
+    $("testBackendBtn")?.addEventListener("click", async () => {
+        const connected = await checkBackendConnection();
+
+        showNotification(
+            connected
+                ? "Backend connection successful."
+                : "Unable to connect to the backend.",
+            connected ? "success" : "error"
+        );
+    });
+
+    $("clearFieldBtn")?.addEventListener("click", () => {
+        clearMapBoundary("analysis");
+
+        $("results").innerHTML =
+            '<p class="muted">Select a field boundary and click Analyse Field.</p>';
+
+        showNotification("Analysis field cleared.");
+    });
+}
+
+
+/* =========================================================
+   APPLICATION STARTUP
+========================================================= */
+
+async function initializeAgritch() {
+    initializeNavigation();
+
+    initializeMaps();
+
+    initializeEventListeners();
+
+    await checkBackendConnection();
+
+    await loadFarms();
+
+    const analyseButton = $("analyzeBtn");
+
+    if (analyseButton) {
+        analyseButton.disabled = true;
+    }
+
+    console.log("Agritch frontend initialized successfully.");
+}
+
+
+document.addEventListener("DOMContentLoaded", initializeAgritch);
+
+</script>
 
 </body>
 </html>
